@@ -13,9 +13,19 @@ export const handleFile = async (e) => {
 
           const sheetName = workbook.SheetNames[0]
           const worksheet = workbook.Sheets[sheetName]
-          const json = XLSX.utils.sheet_to_json(worksheet)
+          const rawJson = XLSX.utils.sheet_to_json(worksheet, { defval: '' })
 
-          resolve(json)
+          // Mapeamento de campos
+          const jsonTransformado = rawJson.map(item => ({
+            Data: item["Data"] || '',
+            Lancamento: item["Lançamento"] || '',
+            Detalhes: item["Detalhes"] || '',
+            NumeroDocumento: item["N° documento"] || '',
+            Valor: item["Valor"] || '',
+            TipoLancamento: item["Tipo Lançamento"] || '',
+          }))
+
+          resolve(jsonTransformado)
         } catch (err) {
           reject(err)
         }
