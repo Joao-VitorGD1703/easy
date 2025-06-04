@@ -1,6 +1,6 @@
 <template>
     <div class="table-container">
-      <table class="custom-table">
+      <table class="custom-table roboto-fraco ">
         <thead>
           <tr>
             <th>Data</th>
@@ -19,7 +19,7 @@
             <td>{{ item.Detalhes }}</td>
             <td>{{ item.NumeroDocumento }}</td>
             <td>{{ item.Valor }}</td>
-            <td>{{ item.TipoLancamento }}</td>
+            <td :style="item.TipoLancamento == 'Entrada' ? 'color:green' : 'color:red'">{{ item.TipoLancamento }}</td>
 
           </tr>
         </tbody>
@@ -43,14 +43,15 @@
   
 
   .custom-table {
-    width: 100%;
+    width: 90vw;
     border-collapse: collapse;
     font-family: 'Segoe UI', sans-serif;
     color: $text-color;
     background-color: $table-bg;
   
     th, td {
-      padding: 0.75rem 1rem;
+
+      padding: 0.75rem 1.2rem;
       text-align: left;
       border-bottom: 1px solid $border-color;
     }

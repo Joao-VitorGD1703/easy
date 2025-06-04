@@ -1,21 +1,20 @@
 <template>
-  <div class="dashboard">
+  <div class="dashboard roboto-fraco">
     <h1 class="titulo">Análise dos Dados</h1>
     <div class="tabela">
       <div class="box info">
-        <p class="label">Salário</p>
-        <p class="valor azul">R$ 5.800,00</p>
-        <p class="data">Última atualização: 10/05/2025</p>
-      </div>
-
-      <div class="box info">
         <p class="label">Saldo Atual</p>
-        <p class="valor verde">R$ 3.250,75</p>
+        <p class="valor verde">{{ saldoAtual }}</p>
         <p class="data">Última atualização: 10/05/2025</p>
       </div>
 
       <div class="box">
-        <BarChart :dataObject="dadosFormatadosBar"  />
+        <DoughnutChart :dataObject="dadosFormatadosDoughnut" class="pie" />
+        <p class="legenda">Gráfico de Doughnut</p>
+      </div>
+
+      <div class="box">
+        <BarChart :dataObject="dadosFormatadosBar" />
         <p class="legenda">Gráfico de Barras</p>
       </div>
 
@@ -31,79 +30,138 @@
 import PieChart from "./PieChart.vue";
 import BarChart from "./BarChart.vue";
 import { computed } from "vue";
+import DoughnutChart from "./DoughnutChart.vue";
 
 const props = defineProps({
   dataGraf: Array,
 });
 
+const saldoAtual = computed(() => {
+  
+  if (!props.dataGraf || !Array.isArray(props.dataGraf)) return null;
+
+  const saldos = props.dataGraf
+    .filter((item) => item.Lancamento === "Saldo do dia" && item.Data && item.Valor)
+    .map((item) => {
+      let valorNumerico = 0;
+
+      if (typeof item.Valor === "string") {
+        valorNumerico = parseFloat(item.Valor.replace("R$", "").replace(/\./g, "").replace(",", "."));
+      } else if (typeof item.Valor === "number") {
+        valorNumerico = item.Valor;
+      }
+
+      return {
+        data: item.Data,
+        valor: isNaN(valorNumerico) ? 0 : valorNumerico,
+      };
+    });
+
+  saldos.sort((a, b) => new Date(b.data) - new Date(a.data));
+
+  return saldos.length > 0
+    ? `R$ ${saldos[0].valor.toFixed(2).replace(".", ",")}`
+    : "R$ 0,00";
+});
+
 const dadosFormatadosBar = computed(() => {
   if (!props.dataGraf || !Array.isArray(props.dataGraf)) return null;
 
-  // Objeto para armazenar o nome (Lancamento) e o valor acumulado
   const dadosAcumulados = {};
 
   props.dataGraf.forEach((item) => {
-    if (item.Data && item.Valor) {
-      if (
-        item.Lancamento != "S A L D O" &&
-        item.Lancamento != "Saldo Anterior" &&
-        item.Lancamento != "Saldo do dia"
-      ) {
-        const valorNumerico = parseFloat(
-          item.Valor.replace("R$", "").replace(/\./g, "").replace(",", ".")
-        );
+    if (
+      item.Data && item.Valor &&
+      item.Lancamento !== "S A L D O" &&
+      item.Lancamento !== "Saldo Anterior" &&
+      item.Lancamento !== "Saldo do dia"
+    ) {
+      let valorNumerico = 0;
 
-        if (!isNaN(valorNumerico)) {
-          if (dadosAcumulados[item.Data]) {
-            dadosAcumulados[item.Data] += valorNumerico;
-          } else {
-            dadosAcumulados[item.Data] = valorNumerico;
-          }
-        }
+      if (typeof item.Valor === "string") {
+        valorNumerico = parseFloat(item.Valor.replace("R$", "").replace(/\./g, "").replace(",", "."));
+      } else if (typeof item.Valor === "number") {
+        valorNumerico = item.Valor;
+      }
+
+      if (!isNaN(valorNumerico)) {
+        dadosAcumulados[item.Data] = (dadosAcumulados[item.Data] || 0) + valorNumerico;
       }
     }
   });
 
   return {
-    Lancamento: Object.keys(dadosAcumulados),  // Nomes (Lancamento)
-    Valor: Object.values(dadosAcumulados),     // Valores acumulados
+    Lancamento: Object.keys(dadosAcumulados),
+    Valor: Object.values(dadosAcumulados),
   };
 });
+
 const dadosFormatadosPie = computed(() => {
   if (!props.dataGraf || !Array.isArray(props.dataGraf)) return null;
 
-  // Objeto para armazenar o nome (Lancamento) e o valor acumulado
   const dadosAcumulados = {};
 
   props.dataGraf.forEach((item) => {
-    if (item.Lancamento && item.Valor) {
-      if (
-        item.Lancamento != "S A L D O" &&
-        item.Lancamento != "Saldo Anterior" &&
-        item.Lancamento != "Saldo do dia"
-      ) {
-        const valorNumerico = parseFloat(
-          item.Valor.replace("R$", "").replace(/\./g, "").replace(",", ".")
-        );
+    if (
+      item.Lancamento && item.Valor &&
+      item.TipoLancamento !== "Entrada" &&
+      item.Lancamento !== "S A L D O" &&
+      item.Lancamento !== "Saldo Anterior" &&
+      item.Lancamento !== "Saldo do dia"
+    ) {
+      let valorNumerico = 0;
 
-        if (!isNaN(valorNumerico)) {
-          if (dadosAcumulados[item.Lancamento]) {
-            dadosAcumulados[item.Lancamento] += valorNumerico;
-          } else {
-            dadosAcumulados[item.Lancamento] = valorNumerico;
-          }
-        }
+      if (typeof item.Valor === "string") {
+        valorNumerico = parseFloat(item.Valor.replace("R$", "").replace(/\./g, "").replace(",", "."));
+      } else if (typeof item.Valor === "number") {
+        valorNumerico = item.Valor;
+      }
+
+      if (!isNaN(valorNumerico)) {
+        dadosAcumulados[item.Lancamento] = (dadosAcumulados[item.Lancamento] || 0) + valorNumerico;
       }
     }
   });
 
   return {
-    Lancamento: Object.keys(dadosAcumulados),  // Nomes (Lancamento)
-    Valor: Object.values(dadosAcumulados),     // Valores acumulados
+    Lancamento: Object.keys(dadosAcumulados),
+    Valor: Object.values(dadosAcumulados),
   };
 });
-</script>
 
+const dadosFormatadosDoughnut = computed(() => {
+  if (!props.dataGraf || !Array.isArray(props.dataGraf)) return null;
+
+  const acumulador = {};
+
+  props.dataGraf.forEach((item) => {
+    if (
+      item.Lancamento !== "S A L D O" &&
+      item.Lancamento !== "Saldo Anterior" &&
+      item.Lancamento !== "Saldo do dia"
+    ) {
+      const nome = (item.Detalhes || "").replace(/^\d{2}\/\d{2} \d{2}:\d{2}\s*/, "").trim();
+
+      let valorNumerico = 0;
+      if (typeof item.Valor === "string") {
+        valorNumerico = parseFloat(item.Valor.replace("R$", "").replace(/\./g, "").replace(",", "."));
+      } else if (typeof item.Valor === "number") {
+        valorNumerico = item.Valor;
+      }
+
+      if (!isNaN(valorNumerico)) {
+        acumulador[nome] = (acumulador[nome] || 0) + valorNumerico;
+      }
+    }
+  });
+
+  return {
+    Lancamento: Object.keys(acumulador),
+    Valor: Object.values(acumulador),
+  };
+});
+
+</script>
 
 <style lang="scss" scoped>
 .dashboard {

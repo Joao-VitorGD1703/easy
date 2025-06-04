@@ -1,14 +1,14 @@
 <template>
     <div class="p-4">
-      <button @click="handleAuth" class="bg-blue-600 text-white px-4 py-2 rounded mr-2">
+      <button @click="handleAuth" class="bg-blue-600 text-white px-4 py-2 rounded mr-2 roboto-fraco">
         Login com Google
       </button>
-      <button @click="listarPlanilhasNaPasta" class="bg-green-600 text-white px-4 py-2 rounded">
+      <button @click="listarPlanilhasNaPasta" class="bg-green-600 text-white px-4 py-2 rounded roboto-fraco">
         Ver planilhas
       </button>
   
       <div class="mt-4">
-        <h2 class="text-lg font-bold mb-2">Planilhas encontradas:</h2>
+        <h2 class="text-lg font-bold mb-2 roboto-fraco">Planilhas encontradas:</h2>
         <ul>
           <li v-for="file in planilhas" :key="file.id">
             {{ file.name }} (ID: {{ file.id }})

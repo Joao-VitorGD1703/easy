@@ -9,7 +9,9 @@ const dados = ref([])
 
 const onFileImported = (fileData) => {
   dados.value = fileData
-  
+    
+     dados.value.preventDefault();
+
   console.log('Arquivo recebido do filho:', fileData)
 }
 
@@ -24,8 +26,20 @@ const paginaAtual = ref('grafs') // valor inicial
     
     <div class="switchs">
       <div class="pages">
-        <button @click="paginaAtual = 'grafs'">Grafs</button>
-        <button @click="paginaAtual = 'tabela'">Table</button>
+        <button
+          class="roboto-fraco"
+          :class="{ 'button-press': paginaAtual === 'grafs' }"
+          @click="paginaAtual = 'grafs'"
+        >
+          Grafs
+        </button>
+        <button
+          class="roboto-fraco"
+          :class="{ 'button-press': paginaAtual === 'tabela' }"
+          @click="paginaAtual = 'tabela'"
+        >
+          Table
+        </button>
       </div>
     </div>
 
@@ -33,6 +47,7 @@ const paginaAtual = ref('grafs') // valor inicial
     <Table v-if="paginaAtual === 'tabela'" :data="dados" />
   </div>
 </template>
+
 
 
 <style scoped lang="scss">
@@ -67,9 +82,16 @@ const paginaAtual = ref('grafs') // valor inicial
     button{
       width: 7em;
       height: 3em;
+      background: var( --third-color);
+      color: var(--white-color);
+      border: 1px solid var(--first-color);
       border-radius: 0.5em 0.5em 0em 0em;
       cursor: pointer;
     }
+      .button-press {
+    background: var(--second-color); // ou uma cor mais clara
+    color: var(--white-color);
+  }
     }
   
   
